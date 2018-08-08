@@ -13,7 +13,7 @@ open class iDempiereMicro : ISystemImpl {
     protected var log: CLogger? = null
 
     override fun startup() {
-        if (log != null ) return
+        if (log != null) return
         val ini = Ini.getIni()
         ini.isClient = false
         CLogMgt.initialize(false)
@@ -43,15 +43,15 @@ open class iDempiereMicro : ISystemImpl {
 
         val system = MSystem.get(Env.getCtx()) ?: return
 
-        //	Initialize main cached Singletons
+        // 	Initialize main cached Singletons
         ModelValidationEngine.get()
         try {
             var className: String? = system.getEncryptionKey()
             if (className == null || className.length == 0) {
                 className = System.getProperty(SecureInterface.ADEMPIERE_SECURE)
-                if (className != null && className.length > 0
-                        && className != SecureInterface.ADEMPIERE_SECURE_DEFAULT) {
-                    SecureEngine.init(className)    //	test it
+                if (className != null && className.length > 0 &&
+                        className != SecureInterface.ADEMPIERE_SECURE_DEFAULT) {
+                    SecureEngine.init(className) // 	test it
                     system.setEncryptionKey(className)
                     system.saveEx()
                 }
@@ -63,8 +63,7 @@ open class iDempiereMicro : ISystemImpl {
             this.log!!.warning("Environment problems: " + e.toString())
         }
 
-
-        //	Start Workflow Document Manager (in other package) for PO
+        // 	Start Workflow Document Manager (in other package) for PO
         var className: String? = null
         try {
             className = "org.compiere.wf.DocWorkflowManager"
@@ -75,5 +74,4 @@ open class iDempiereMicro : ISystemImpl {
 
         DB.updateMail()
     }
-
 }

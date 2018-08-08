@@ -26,19 +26,19 @@ class Login : ILoginUtility {
     override fun getClients(role: INameKeyPair): Array<INameKeyPair> {
         val m_ctx = Env.getCtx()
         val list = mutableListOf<KeyNamePair>()
-        val sql = ("SELECT DISTINCT r.UserLevel, r.ConnectionProfile, "    //	1/2
+        val sql = ("SELECT DISTINCT r.UserLevel, r.ConnectionProfile, " + // 	1/2
 
-                + " c.AD_Client_ID,c.Name "                        //	3/4
+                " c.AD_Client_ID,c.Name " + // 	3/4
 
-                + "FROM AD_Role r"
-                + " INNER JOIN AD_Client c ON (r.AD_Client_ID=c.AD_Client_ID) "
-                + "WHERE r.AD_Role_ID=?"        //	#1
+                "FROM AD_Role r" +
+                " INNER JOIN AD_Client c ON (r.AD_Client_ID=c.AD_Client_ID) " +
+                "WHERE r.AD_Role_ID=?" + // 	#1
 
-                + " AND r.IsActive='Y' AND c.IsActive='Y'")
+                " AND r.IsActive='Y' AND c.IsActive='Y'")
 
         var pstmt: PreparedStatement? = null
         var rs: ResultSet? = null
-        //	get Role details
+        // 	get Role details
         try {
             pstmt = DB.prepareStatement(sql, null)
             pstmt!!.setInt(1, role.Key)
@@ -53,8 +53,8 @@ class Login : ILoginUtility {
             Env.setContext(m_ctx, "#AD_Role_ID", role.Key)
             Env.setContext(m_ctx, "#AD_Role_Name", role.name)
             Ini.getIni().setProperty(Ini.getIni().P_ROLE, role.name)
-            //	User Level
-            Env.setContext(m_ctx, "#User_Level", rs.getString(1))    //	Format 'SCO'
+            // 	User Level
+            Env.setContext(m_ctx, "#User_Level", rs.getString(1)) // 	Format 'SCO'
 
             //  load Clients
             do {
@@ -84,7 +84,7 @@ class Login : ILoginUtility {
             return arrayOf()
         }
 
-        //	Authentication
+        // 	Authentication
         var authenticated = false
         val system = MSystem.get(m_ctx) ?: throw IllegalStateException("No System Info")
 
@@ -266,7 +266,6 @@ class Login : ILoginUtility {
                     } else {
                         loginErrMsg = Msg.getMsg(m_ctx, "FailedLogin", true)
                     }
-
                 } else {
                     reachMaxAttempt = false
                 }
@@ -313,7 +312,7 @@ class Login : ILoginUtility {
 
         var pstmt: PreparedStatement? = null
         var rs: ResultSet? = null
-        //	get Role details
+        // 	get Role details
         try {
             pstmt = DB.prepareStatement(sql.toString(), null)
             pstmt!!.setInt(1, client.Key)
@@ -341,7 +340,7 @@ class Login : ILoginUtility {
             rs = null
             pstmt = null
         }
-        //Client Info
+        // Client Info
         Env.setContext(m_ctx, "#AD_Client_ID", client.Key)
         Env.setContext(m_ctx, "#AD_Client_Name", client.name)
         Ini.getIni().setProperty(Ini.getIni().P_CLIENT, client.name)
@@ -351,29 +350,29 @@ class Login : ILoginUtility {
     override fun getOrgs(rol: INameKeyPair): Array<INameKeyPair> {
         val m_ctx = Env.getCtx()
         if (Env.getContext(m_ctx, "#AD_Client_ID").length == 0)
-        //	could be number 0
+        // 	could be number 0
             throw UnsupportedOperationException("Missing Context #AD_Client_ID")
 
         val AD_Client_ID = Env.getContextAsInt(m_ctx, "#AD_Client_ID")
         val AD_User_ID = Env.getContextAsInt(m_ctx, "#AD_User_ID")
-        //	s_log.fine("Client: " + client.toStringX() + ", AD_Role_ID=" + AD_Role_ID);
+        // 	s_log.fine("Client: " + client.toStringX() + ", AD_Role_ID=" + AD_Role_ID);
 
-        //	get Client details for role
+        // 	get Client details for role
         val list = ArrayList<KeyNamePair>()
         //
-        val sql = (" SELECT DISTINCT r.UserLevel, r.ConnectionProfile,o.AD_Org_ID,o.Name,o.IsSummary "
-                + " FROM AD_Org o"
-                + " INNER JOIN AD_Role r on (r.AD_Role_ID=?)"
-                + " INNER JOIN AD_Client c on (c.AD_Client_ID=?)"
-                + " WHERE o.IsActive='Y' "
-                + " AND o.AD_Client_ID IN (0, c.AD_Client_ID)"
-                + " AND (r.IsAccessAllOrgs='Y'"
-                + " OR (r.IsUseUserOrgAccess='N' AND o.AD_Org_ID IN (SELECT AD_Org_ID FROM AD_Role_OrgAccess ra"
-                + " WHERE ra.AD_Role_ID=r.AD_Role_ID AND ra.IsActive='Y')) "
-                + " OR (r.IsUseUserOrgAccess='Y' AND o.AD_Org_ID IN (SELECT AD_Org_ID FROM AD_User_OrgAccess ua"
-                + " WHERE ua.AD_User_ID=?"
-                + " AND ua.IsActive='Y')))"
-                + "ORDER BY o.Name")
+        val sql = (" SELECT DISTINCT r.UserLevel, r.ConnectionProfile,o.AD_Org_ID,o.Name,o.IsSummary " +
+                " FROM AD_Org o" +
+                " INNER JOIN AD_Role r on (r.AD_Role_ID=?)" +
+                " INNER JOIN AD_Client c on (c.AD_Client_ID=?)" +
+                " WHERE o.IsActive='Y' " +
+                " AND o.AD_Client_ID IN (0, c.AD_Client_ID)" +
+                " AND (r.IsAccessAllOrgs='Y'" +
+                " OR (r.IsUseUserOrgAccess='N' AND o.AD_Org_ID IN (SELECT AD_Org_ID FROM AD_Role_OrgAccess ra" +
+                " WHERE ra.AD_Role_ID=r.AD_Role_ID AND ra.IsActive='Y')) " +
+                " OR (r.IsUseUserOrgAccess='Y' AND o.AD_Org_ID IN (SELECT AD_Org_ID FROM AD_User_OrgAccess ua" +
+                " WHERE ua.AD_User_ID=?" +
+                " AND ua.IsActive='Y')))" +
+                "ORDER BY o.Name")
         //
         var pstmt: PreparedStatement? = null
         var role: MRole? = null
@@ -393,8 +392,8 @@ class Login : ILoginUtility {
             Env.setContext(m_ctx, "#AD_Role_ID", rol.Key)
             Env.setContext(m_ctx, "#AD_Role_Name", rol.name)
             Ini.getIni().setProperty(Ini.getIni().P_ROLE, rol.name)
-            //	User Level
-            Env.setContext(m_ctx, "#User_Level", rs.getString(1))    //	Format 'SCO'
+            // 	User Level
+            Env.setContext(m_ctx, "#User_Level", rs.getString(1)) // 	Format 'SCO'
             //  load Orgs
 
             do {
@@ -422,33 +421,37 @@ class Login : ILoginUtility {
         }
 
         if (list.count() == 0) {
-            log.log(Level.WARNING, "No Org for Client: " + AD_Client_ID
-                    + ", AD_Role_ID=" + rol.Key
-                    + ", AD_User_ID=" + AD_User_ID)
+            log.log(Level.WARNING, "No Org for Client: " + AD_Client_ID +
+                    ", AD_Role_ID=" + rol.Key +
+                    ", AD_User_ID=" + AD_User_ID)
             return arrayOf()
         }
         return list.toTypedArray()
     }
 
-    private fun getOrgsAddSummary(list: ArrayList<KeyNamePair>, Summary_Org_ID: Int,
-                                  Summary_Name: String, role: MRole?) {
+    private fun getOrgsAddSummary(
+        list: ArrayList<KeyNamePair>,
+        Summary_Org_ID: Int,
+        Summary_Name: String,
+        role: MRole?
+    ) {
         val m_ctx = Env.getCtx()
         if (role == null) {
             log.warning("Summary Org=$Summary_Name($Summary_Org_ID) - No Role")
             return
         }
-        //	Do we look for trees?
+        // 	Do we look for trees?
         if (role.aD_Tree_Org_ID == 0) {
             if (log.isLoggable(Level.CONFIG)) log.config("Summary Org=$Summary_Name($Summary_Org_ID) - No Org Tree: $role")
             return
         }
-        //	Summary Org - Get Dependents
+        // 	Summary Org - Get Dependents
         val tree = MTree_Base.get(m_ctx, role.aD_Tree_Org_ID, null)
-        val sql = ("SELECT AD_Client_ID, AD_Org_ID, Name, IsSummary FROM AD_Org "
-                + "WHERE IsActive='Y' AND AD_Org_ID IN (SELECT Node_ID FROM "
-                + tree.nodeTableName
-                + " WHERE AD_Tree_ID=? AND Parent_ID=? AND IsActive='Y') "
-                + "ORDER BY Name")
+        val sql = ("SELECT AD_Client_ID, AD_Org_ID, Name, IsSummary FROM AD_Org " +
+                "WHERE IsActive='Y' AND AD_Org_ID IN (SELECT Node_ID FROM " +
+                tree.nodeTableName +
+                " WHERE AD_Tree_ID=? AND Parent_ID=? AND IsActive='Y') " +
+                "ORDER BY Name")
         var pstmt: PreparedStatement? = null
         var rs: ResultSet? = null
         try {
@@ -457,7 +460,7 @@ class Login : ILoginUtility {
             pstmt.setInt(2, Summary_Org_ID)
             rs = pstmt.executeQuery()
             while (rs!!.next()) {
-                //int AD_Client_ID = rs.getInt(1);
+                // int AD_Client_ID = rs.getInt(1);
                 val AD_Org_ID = rs.getInt(2)
                 val Name = rs.getString(3)
                 val summary = "Y" == rs.getString(4)
@@ -477,15 +480,15 @@ class Login : ILoginUtility {
             rs = null
             pstmt = null
         }
-    }    //	getOrgAddSummary
+    } // 	getOrgAddSummary
 
     override fun getWarehouses(org: INameKeyPair): Array<INameKeyPair> {
         val list = ArrayList<KeyNamePair>()
-        val sql = ("SELECT M_Warehouse_ID, Name FROM M_Warehouse "
-                + "WHERE AD_Org_ID=? AND IsActive='Y' "
-                + " AND " + I_M_Warehouse.COLUMNNAME_IsInTransit + "='N' " // do not show in tranzit warehouses - teo_sarca [ 2867246 ]
+        val sql = ("SELECT M_Warehouse_ID, Name FROM M_Warehouse " +
+                "WHERE AD_Org_ID=? AND IsActive='Y' " +
+                " AND " + I_M_Warehouse.COLUMNNAME_IsInTransit + "='N' " + // do not show in tranzit warehouses - teo_sarca [ 2867246 ]
 
-                + "ORDER BY Name")
+                "ORDER BY Name")
         var pstmt: PreparedStatement? = null
         var rs: ResultSet? = null
         try {
@@ -507,8 +510,8 @@ class Login : ILoginUtility {
             } while (rs.next())
 
             if (log.isLoggable(Level.FINE))
-                log.fine("Org: " + org.toString()
-                        + " - warehouses #" + list.count())
+                log.fine("Org: " + org.toString() +
+                        " - warehouses #" + list.count())
         } catch (ex: SQLException) {
             log.log(Level.SEVERE, "getWarehouses", ex)
         } finally {
@@ -554,22 +557,22 @@ class Login : ILoginUtility {
             Ini.getIni().setProperty(Ini.getIni().P_WAREHOUSE, warehouse.name)
         }
 
-        //	Date (default today)
+        // 	Date (default today)
         var today = System.currentTimeMillis()
         if (timestamp != null)
             today = timestamp.time
         Env.setContext(m_ctx, "#Date", java.sql.Timestamp(today))
 
-        //	Optional Printer
-        val printerName2 = if (printerName == null) {""} else {printerName}
+        // 	Optional Printer
+        val printerName2 = if (printerName == null) { "" } else { printerName }
 
         Env.setContext(m_ctx, "#Printer", printerName2)
         Ini.getIni().setProperty(Ini.getIni().P_PRINTER, printerName2)
 
-        //	Load Role Info
+        // 	Load Role Info
         MRole.getDefault(m_ctx, true)
 
-        //	Other
+        // 	Other
         loadUserPreferences()
 
         if (MRole.getDefault(m_ctx, false).isShowAcct)
@@ -583,15 +586,15 @@ class Login : ILoginUtility {
         val AD_Client_ID = Env.getContextAsInt(m_ctx, "#AD_Client_ID")
         val AD_Org_ID = org.Key
 
-        //	Other Settings
+        // 	Other Settings
         Env.setContext(m_ctx, "#YYYY", "Y")
         Env.setContext(m_ctx, "#StdPrecision", 2)
 
-        //	AccountSchema Info (first)
-        var sql = ("SELECT * "
-                + "FROM C_AcctSchema a, AD_ClientInfo c "
-                + "WHERE a.C_AcctSchema_ID=c.C_AcctSchema1_ID "
-                + "AND c.AD_Client_ID=?")
+        // 	AccountSchema Info (first)
+        var sql = ("SELECT * " +
+                "FROM C_AcctSchema a, AD_ClientInfo c " +
+                "WHERE a.C_AcctSchema_ID=c.C_AcctSchema1_ID " +
+                "AND c.AD_Client_ID=?")
         var pstmt: PreparedStatement? = null
         var rs: ResultSet? = null
         try {
@@ -607,7 +610,7 @@ class Login : ILoginUtility {
                 if (AD_Client_ID != 0)
                     retValue = "NoValidAcctInfo"
             } else {
-                //	Accounting Info
+                // 	Accounting Info
                 C_AcctSchema_ID = rs.getInt("C_AcctSchema_ID")
                 Env.setContext(m_ctx, "\$C_AcctSchema_ID", C_AcctSchema_ID)
                 Env.setContext(m_ctx, "\$C_Currency_ID", rs.getInt("C_Currency_ID"))
@@ -637,11 +640,11 @@ class Login : ILoginUtility {
                 }
             }*/
 
-            //	Accounting Elements
-            sql = ("SELECT ElementType "
-                    + "FROM C_AcctSchema_Element "
-                    + "WHERE C_AcctSchema_ID=?"
-                    + " AND IsActive='Y'")
+            // 	Accounting Elements
+            sql = ("SELECT ElementType " +
+                    "FROM C_AcctSchema_Element " +
+                    "WHERE C_AcctSchema_ID=?" +
+                    " AND IsActive='Y'")
             pstmt = DB.prepareStatement(sql, null)
             pstmt!!.setInt(1, C_AcctSchema_ID)
             rs = pstmt.executeQuery()
@@ -651,16 +654,16 @@ class Login : ILoginUtility {
             rs = null
             pstmt = null
 
-            //	This reads all relevant window neutral defaults
-            //	overwriting superseeded ones.  Window specific is read in Mainain
-            sql = ("SELECT Attribute, Value, AD_Window_ID, AD_Process_ID, AD_InfoWindow_ID, PreferenceFor "
-                    + "FROM AD_Preference "
-                    + "WHERE AD_Client_ID IN (0, @#AD_Client_ID@)"
-                    + " AND AD_Org_ID IN (0, @#AD_Org_ID@)"
-                    + " AND (AD_User_ID IS NULL OR AD_User_ID=0 OR AD_User_ID=@#AD_User_ID@)"
-                    + " AND IsActive='Y' "
-                    + "ORDER BY Attribute, AD_Client_ID, AD_User_ID DESC, AD_Org_ID")
-            //	the last one overwrites - System - Client - User - Org - Window
+            // 	This reads all relevant window neutral defaults
+            // 	overwriting superseeded ones.  Window specific is read in Mainain
+            sql = ("SELECT Attribute, Value, AD_Window_ID, AD_Process_ID, AD_InfoWindow_ID, PreferenceFor " +
+                    "FROM AD_Preference " +
+                    "WHERE AD_Client_ID IN (0, @#AD_Client_ID@)" +
+                    " AND AD_Org_ID IN (0, @#AD_Org_ID@)" +
+                    " AND (AD_User_ID IS NULL OR AD_User_ID=0 OR AD_User_ID=@#AD_User_ID@)" +
+                    " AND IsActive='Y' " +
+                    "ORDER BY Attribute, AD_Client_ID, AD_User_ID DESC, AD_Org_ID")
+            // 	the last one overwrites - System - Client - User - Org - Window
             sql = Env.parseContext(m_ctx, 0, sql, false)
             if (sql.length == 0)
                 log.log(Level.SEVERE, "loadPreferences - Missing Environment")
@@ -696,14 +699,14 @@ class Login : ILoginUtility {
                 pstmt = null
             }
 
-            //	Default Values
+            // 	Default Values
             if (log.isLoggable(Level.INFO)) log.info("Default Values ...")
-            sql = ("SELECT t.TableName, c.ColumnName "
-                    + "FROM AD_Column c "
-                    + " INNER JOIN AD_Table t ON (c.AD_Table_ID=t.AD_Table_ID) "
-                    + "WHERE c.IsKey='Y' AND t.IsActive='Y' AND t.IsView='N'"
-                    + " AND EXISTS (SELECT * FROM AD_Column cc "
-                    + " WHERE ColumnName = 'IsDefault' AND t.AD_Table_ID=cc.AD_Table_ID AND cc.IsActive='Y')")
+            sql = ("SELECT t.TableName, c.ColumnName " +
+                    "FROM AD_Column c " +
+                    " INNER JOIN AD_Table t ON (c.AD_Table_ID=t.AD_Table_ID) " +
+                    "WHERE c.IsKey='Y' AND t.IsActive='Y' AND t.IsView='N'" +
+                    " AND EXISTS (SELECT * FROM AD_Column cc " +
+                    " WHERE ColumnName = 'IsDefault' AND t.AD_Table_ID=cc.AD_Table_ID AND cc.IsActive='Y')")
             pstmt = DB.prepareStatement(sql, null)
             rs = pstmt!!.executeQuery()
             while (rs!!.next())
@@ -715,7 +718,7 @@ class Login : ILoginUtility {
             rs = null
             pstmt = null
         }
-        //	Country
+        // 	Country
         Env.setContext(m_ctx, "#C_Country_ID", MCountry.getDefault(m_ctx).getC_Country_ID())
         // Call ModelValidators afterLoadPreferences - teo_sarca FR [ 1670025 ]
         ModelValidationEngine.get().afterLoadPreferences(m_ctx)
@@ -724,16 +727,16 @@ class Login : ILoginUtility {
 
     private fun loadDefault(TableName: String, ColumnName: String) {
         val m_ctx = Env.getCtx()
-        if (TableName.startsWith("AD_Window")
-                || TableName.startsWith("AD_PrintFormat")
-                || TableName.startsWith("AD_Workflow")
-                || TableName.startsWith("M_Locator"))
+        if (TableName.startsWith("AD_Window") ||
+                TableName.startsWith("AD_PrintFormat") ||
+                TableName.startsWith("AD_Workflow") ||
+                TableName.startsWith("M_Locator"))
             return
         var value: String? = null
         //
-        var sql = ("SELECT " + ColumnName + " FROM " + TableName    //	most specific first
+        var sql = ("SELECT " + ColumnName + " FROM " + TableName + // 	most specific first
 
-                + " WHERE IsDefault='Y' AND IsActive='Y' ORDER BY AD_Client_ID DESC, AD_Org_ID DESC")
+                " WHERE IsDefault='Y' AND IsActive='Y' ORDER BY AD_Client_ID DESC, AD_Org_ID DESC")
         sql = MRole.getDefault(m_ctx, false).addAccessSQL(sql,
                 TableName, MRole.SQL_NOTQUALIFIED, MRole.SQL_RO)
         var pstmt: PreparedStatement? = null
@@ -751,7 +754,7 @@ class Login : ILoginUtility {
             rs = null
             pstmt = null
         }
-        //	Set Context Value
+        // 	Set Context Value
         if (value != null && value.length != 0) {
             if (TableName == "C_DocType")
                 Env.setContext(m_ctx, "#C_DocTypeTarget_ID", value)
