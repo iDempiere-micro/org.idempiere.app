@@ -7,10 +7,38 @@ import org.idempiere.common.db.CConnection
 import org.idempiere.common.util.*
 import org.osgi.service.component.annotations.Component
 import software.hsharp.core.services.ISystemImpl
+import java.util.concurrent.ScheduledThreadPoolExecutor
 
 @Component
 open class iDempiereMicro : ISystemImpl {
+    override fun getThreadPoolExecutor(): ScheduledThreadPoolExecutor {
+        return threadPoolExecutor!!
+    }
+
     protected var log: CLogger? = null
+    private var threadPoolExecutor: ScheduledThreadPoolExecutor? = null
+
+	private fun createThreadPool() {
+		val defaultMax = Runtime.getRuntime().availableProcessors() * 20
+        val properties = Ini.getIni().getProperties();
+        val s = properties.getProperty("MaxThreadPoolSize");
+        val maxSize =
+            if (s != null) {
+                try {
+                    Integer.parseInt(s);
+                } catch (e: Exception) {
+                    0
+                }
+            } else { 0 }
+
+        val max =
+            if (maxSize <= 0) {
+                 defaultMax
+            } else { maxSize }
+
+		// start thread pool
+		threadPoolExecutor = ScheduledThreadPoolExecutor(max)
+	}
 
     override fun startup() {
         if (log != null) return
@@ -31,6 +59,7 @@ open class iDempiereMicro : ISystemImpl {
             }
         }
         DB.setDBTarget(CConnection.get(null))
+        createThreadPool()
 
         if (!DB.isConnected()) {
             this.log!!.severe("No Database")
