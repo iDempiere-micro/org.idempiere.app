@@ -69,8 +69,6 @@ class Login : ILoginUtility {
             log.log(Level.SEVERE, sql, ex)
         } finally {
             DB.close(rs, pstmt)
-            rs = null
-            pstmt = null
         }
         return list.toTypedArray()
     }
@@ -165,7 +163,7 @@ class Login : ILoginUtility {
                 return arrayOf()
             }
             clientsValidated.add(user.getAD_Client_ID())
-            var valid = false
+            var valid: Boolean
             // authenticated by ldap
             if (authenticated) {
                 valid = true
@@ -222,8 +220,6 @@ class Login : ILoginUtility {
                     log.log(Level.SEVERE, sql.toString(), ex)
                 } finally {
                     DB.close(rs, pstmt)
-                    rs = null
-                    pstmt = null
                 }
             }
         }
@@ -337,8 +333,6 @@ class Login : ILoginUtility {
             log.log(Level.SEVERE, sql.toString(), ex)
         } finally {
             DB.close(rs, pstmt)
-            rs = null
-            pstmt = null
         }
         // Client Info
         Env.setContext(m_ctx, "#AD_Client_ID", client.Key)
@@ -477,8 +471,6 @@ class Login : ILoginUtility {
             log.log(Level.SEVERE, sql, e)
         } finally {
             DB.close(rs, pstmt)
-            rs = null
-            pstmt = null
         }
     } // 	getOrgAddSummary
 
@@ -516,8 +508,6 @@ class Login : ILoginUtility {
             log.log(Level.SEVERE, "getWarehouses", ex)
         } finally {
             DB.close(rs, pstmt)
-            rs = null
-            pstmt = null
         }
         return list.toTypedArray()
     }
@@ -527,7 +517,7 @@ class Login : ILoginUtility {
     }
 
     fun loadUserPreferences() {
-        val m_ctx = Env.getCtx()
+        Env.getCtx()
         /* DAP commented out for now
         val userPreference = MUserPreference.getUserPreference(Env.getAD_User_ID(m_ctx), Env.getAD_Client_ID(m_ctx))
         userPreference.fillPreferences()*/
@@ -584,7 +574,6 @@ class Login : ILoginUtility {
 
         var retValue = ""
         val AD_Client_ID = Env.getContextAsInt(m_ctx, "#AD_Client_ID")
-        val AD_Org_ID = org.Key
 
         // 	Other Settings
         Env.setContext(m_ctx, "#YYYY", "Y")
@@ -617,8 +606,6 @@ class Login : ILoginUtility {
                 Env.setContext(m_ctx, "\$HasAlias", rs.getString("HasAlias"))
             }
             DB.close(rs, pstmt)
-            rs = null
-            pstmt = null
 
             /**Define AcctSchema , Currency, HasAlias for Multi AcctSchema */
             /* DAP we do not have it here
@@ -651,8 +638,6 @@ class Login : ILoginUtility {
             while (rs!!.next())
                 Env.setContext(m_ctx, "\$Element_" + rs.getString("ElementType"), "Y")
             DB.close(rs, pstmt)
-            rs = null
-            pstmt = null
 
             // 	This reads all relevant window neutral defaults
             // 	overwriting superseeded ones.  Window specific is read in Mainain
@@ -695,8 +680,6 @@ class Login : ILoginUtility {
                     Env.setContext(m_ctx, at, va)
                 }
                 DB.close(rs, pstmt)
-                rs = null
-                pstmt = null
             }
 
             // 	Default Values
@@ -715,8 +698,6 @@ class Login : ILoginUtility {
             log.log(Level.SEVERE, "loadPreferences", e)
         } finally {
             DB.close(rs, pstmt)
-            rs = null
-            pstmt = null
         }
         // 	Country
         Env.setContext(m_ctx, "#C_Country_ID", MCountry.getDefault(m_ctx).getC_Country_ID())
